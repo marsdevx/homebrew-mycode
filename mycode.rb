@@ -1,8 +1,8 @@
 class Mycode < Formula
   desc "My Python CLI tool"
   homepage "https://github.com/marsdevx/mycode"
-  url "https://github.com/marsdevx/mycode/archive/refs/tags/v1.0.1.tar.gz"
-  sha256 "b0556f0e4e4c14ec10afef0e3ce3a2f10facdb1fe3e29d53b11b3926d907c5ee"
+  url "https://github.com/marsdevx/mycode/archive/refs/tags/v1.0.2.tar.gz"
+  sha256 "f2091f915ebd2c793b85f27449729481332d66f6d921ab1aedda05bfad99907c"
   license "MIT"
 
   depends_on "python@3.12"
