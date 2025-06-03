@@ -1,3 +1,3 @@
-# Repository Status
+# Homebrew Tap for Mycode
 
-This Git repository is currently in beta version. Features and functionality are subject to change. Feedback and contributions are welcome!
+This repository contains the [Homebrew](https://brew.sh) formula for installing [mycode](https://github.com/marsdevx/mycode).
