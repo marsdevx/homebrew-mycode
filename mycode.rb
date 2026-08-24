@@ -3,8 +3,8 @@ class Mycode < Formula
 
   desc "My Python CLI tool"
   homepage "https://github.com/marsdevx/mycode"
-  url "https://github.com/marsdevx/mycode/archive/refs/tags/v1.0.3.tar.gz"
-  sha256 "a0ec995d9dfa273390ce3e10285755e9fa109c8ccc2f10e7f99758de915fa2c7"
+  url "https://github.com/marsdevx/mycode/archive/refs/tags/v1.0.4.tar.gz"
+  sha256 "70192fd34e39298ded363deca5c89b29c633326e00bfcbfbebea65bfa72dcb84"
   license "MIT"
 
   depends_on "python@3.12"
@@ -75,61 +75,20 @@ class Mycode < Formula
     odie "argcomplete's generated script changed shape; update generate_completions" unless script.include?(marker)
     functions = script.split(marker).first
 
-    # Zsh filters argcomplete's candidates a second time, and that pass is
-    # case-sensitive -- `mycode home<TAB>` would drop "HomeLab" even though
-    # mycode itself already offered it. A per-command `matcher-list` zstyle
-    # cannot fix that: the style is read before the command is known, so the
-    # only form that takes effect would change matching for every command the
-    # user completes. Reimplement `_python_argcomplete`'s zsh branch instead
-    # and hand the match spec straight to compadd via -M.
-    #
-    # Single-quoted heredoc on purpose: the body is zsh, and Ruby would
-    # otherwise eat the backslashes in `$'\013'` and the line continuations.
-    wrapper = <<~'ZSH'
-      _mycode_argcomplete() {
-        local IFS=$'\013'
-        local -a completions nosort nospace
-        completions=($(IFS="$IFS" \
-            COMP_LINE="$BUFFER" \
-            COMP_POINT="$CURSOR" \
-            _ARGCOMPLETE=1 \
-            _ARGCOMPLETE_SHELL="zsh" \
-            _ARGCOMPLETE_SUPPRESS_SPACE=1 \
-            __python_argcomplete_run "${words[1]}"))
-        if is-at-least 5.8; then
-          nosort=(-o nosort)
-        fi
-        if [[ "${completions-}" =~ ([^\\]): && "${match[1]}" =~ [=/:] ]]; then
-          nospace=(-S '')
-        fi
-        _describe "${words[1]}" completions "${nosort[@]}" "${nospace[@]}" \
-            -M 'm:{[:lower:][:upper:]}={[:upper:][:lower:]}'
-      }
-
-      _mycode() {
-        # `-c <project_name> <target_dir>`: the name is freeform, the target is a path.
-        if (( CURRENT > 2 )) &&
-            [[ ${words[CURRENT-2]} == --create || ${words[CURRENT-2]} == -c ]]; then
-          _files
-          return
-        fi
-
-        if (( CURRENT > 1 )) &&
-            [[ ${words[CURRENT-1]} == --create || ${words[CURRENT-1]} == -c ]]; then
-          return
-        fi
-
-        _mycode_argcomplete "$@"
-      }
-
-      _mycode "$@"
-    ZSH
+    # The completion functions come from the tarball rather than a copy kept
+    # here: they are identical to what a non-Homebrew install sources, and two
+    # copies drifted apart once already.
+    wrapper = (buildpath/"completions/mycode-wrapper.zsh").read
 
     (zsh_completion/"_mycode").write <<~ZSH
       #compdef mycode
       autoload -Uz is-at-least
       #{functions}
       #{wrapper}
+
+      # Autoloaded from fpath via the #compdef tag above, so the file body is
+      # what runs on the first completion: define, then call.
+      _mycode "$@"
     ZSH
   end
 
